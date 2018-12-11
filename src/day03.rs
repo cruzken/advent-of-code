@@ -1,18 +1,14 @@
-use std::collections::HashSet;
-use std::collections::HashMap;
+use std::collections::{HashSet, HashMap};
 
 #[allow(dead_code)]
 pub fn star_one(input: &str) -> usize {
     let claims: Vec<Claim> = parse_claims(&input);
-    let mut overlapped_claims: HashSet<(u32, u32)> = HashSet::new();
+    let mut grid: HashMap<(u32, u32), HashSet<u32>> = HashMap::new();
     for i in 0..claims.len() {
-        for j in (i + 1)..claims.len() {
-            for overlap in get_overlap(&claims[i], &claims[j]) {
-                overlapped_claims.insert(overlap);
-            }
-        }
+        insert_claim(&claims[i], &mut grid);
     }
-    overlapped_claims.len()
+    
+    grid.iter().filter(|(.., v)| v.len() > 1).count()
 }
 
 #[allow(dead_code)]
@@ -23,11 +19,9 @@ pub fn star_two(input: &str) -> u32 {
         insert_claim(&claims[i], &mut grid);
     }
     let mut overlapped_ids: HashSet<u32> = HashSet::new();
-    for (.., ids) in grid.iter() {
-        if ids.len() > 1 {
-            for id in ids.iter() {
-                overlapped_ids.insert(*id);
-            }
+    for (.., ids) in grid.iter().filter(|(.., v)| v.len() > 1) {
+        for id in ids.iter() {
+            overlapped_ids.insert(*id);
         }
     }
     let claim_ids: HashSet<u32> = claims.into_iter().map(|x| x.id).collect();
@@ -42,13 +36,11 @@ fn insert_claim(claim: &Claim, grid: &mut HashMap<(u32, u32), HashSet<u32>>) {
     for y in claim.top_edge..(claim.top_edge + claim.height) {
         for x in claim.left_edge..(claim.left_edge + claim.width) {
             let claim_coords = (x, y);
-            
             let claim_ids = grid.entry(claim_coords).or_insert(HashSet::new());
-            claim_ids.insert(claim.id);
             
+            claim_ids.insert(claim.id);
         }
     }
-        
 }
 
 fn parse_claims(input: &str) -> Vec<Claim> {
@@ -62,79 +54,23 @@ fn parse_claims(input: &str) -> Vec<Claim> {
 }
 
 fn claim_builder(claim_str: &str) -> Claim {
-    let parsed_claim = claim_str
+    let claim_groups: Vec<u32> = claim_str
         .replace("#", "")
         .replace(" @ ", " ")
         .replace(",", " ")
         .replace(":", "")
-        .replace("x", " ");
-
-    let claim_groups: Vec<u32> = parsed_claim
+        .replace("x", " ")
         .split_whitespace()
         .map(|x| parse_u32(x))
         .collect();
-
-    let (id, left_edge, top_edge, width, height) = (
-        claim_groups[0],
-        claim_groups[1],
-        claim_groups[2],
-        claim_groups[3],
-        claim_groups[4],
-    );
-
+        
     Claim {
-        id,
-        left_edge,
-        top_edge,
-        width,
-        height,
+        id: claim_groups[0],
+        left_edge: claim_groups[1],
+        top_edge: claim_groups[2],
+        width: claim_groups[3],
+        height: claim_groups[4],
     }
-}
-
-fn get_overlap(i: &Claim, j: &Claim) -> HashSet<(u32, u32)> {
-    let overlap: HashSet<(u32, u32)> = HashSet::new();
-    if has_overlap(i, j) {
-        return get_overlap_coords(i, j);
-    }
-    overlap
-}
-
-fn has_overlap(i: &Claim, j: &Claim) -> bool {
-    let i_top_left = (i.left_edge, i.top_edge);
-    let i_bot_right = (i.left_edge + i.width - 1, i.top_edge + i.height - 1);
-    let j_top_left = (j.left_edge, j.top_edge);
-    let j_bot_right = (j.left_edge + j.width - 1, j.top_edge + j.height - 1);
-
-    if i_top_left.0 > j_bot_right.0 || j_top_left.0 > i_bot_right.0 {
-        return false;
-    }
-    if i_top_left.1 > j_bot_right.1 || j_top_left.1 > i_bot_right.1 {
-        return false;
-    }
-    true
-}
-
-// lazy and inefficient way
-fn get_overlap_coords(i: &Claim, j: &Claim) -> HashSet<(u32, u32)> {
-    let mut overlap_coords: HashSet<(u32, u32)> = HashSet::new();
-    let mut i_squares: HashSet<(u32, u32)> = HashSet::new();
-    let mut j_squares: HashSet<(u32, u32)> = HashSet::new();
-
-    for y in i.top_edge..(i.top_edge + i.height) {
-        for x in i.left_edge..(i.left_edge + i.width) {
-            i_squares.insert((x, y));
-        }
-    }
-
-    for y in j.top_edge..(j.top_edge + j.height) {
-        for x in j.left_edge..(j.left_edge + j.width) {
-            j_squares.insert((x, y));
-        }
-    }
-    for coords in i_squares.intersection(&j_squares) {
-        overlap_coords.insert(*coords);
-    }
-    overlap_coords
 }
 
 fn parse_u32(slice: &str) -> u32 {
