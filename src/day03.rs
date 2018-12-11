@@ -2,10 +2,10 @@ use std::collections::{HashSet, HashMap};
 
 #[allow(dead_code)]
 pub fn star_one(input: &str) -> usize {
-    let claims: Vec<Claim> = parse_claims(&input);
+    let claims: HashSet<Claim> = parse_claims(&input);
     let mut grid: HashMap<(u32, u32), HashSet<u32>> = HashMap::new();
-    for i in 0..claims.len() {
-        insert_claim(&claims[i], &mut grid);
+    for i in claims.iter() {
+        insert_claim(&i, &mut grid);
     }
     
     grid.iter().filter(|(.., v)| v.len() > 1).count()
@@ -13,10 +13,10 @@ pub fn star_one(input: &str) -> usize {
 
 #[allow(dead_code)]
 pub fn star_two(input: &str) -> u32 {
-    let claims: Vec<Claim> = parse_claims(&input);
+    let claims: HashSet<Claim> = parse_claims(&input);
     let mut grid: HashMap<(u32, u32), HashSet<u32>> = HashMap::new();
-    for i in 0..claims.len() {
-        insert_claim(&claims[i], &mut grid);
+    for i in claims.iter() {
+        insert_claim(&i, &mut grid);
     }
     let mut overlapped_ids: HashSet<u32> = HashSet::new();
     for (.., ids) in grid.iter().filter(|(.., v)| v.len() > 1) {
@@ -36,18 +36,18 @@ fn insert_claim(claim: &Claim, grid: &mut HashMap<(u32, u32), HashSet<u32>>) {
     for y in claim.top_edge..(claim.top_edge + claim.height) {
         for x in claim.left_edge..(claim.left_edge + claim.width) {
             let claim_coords = (x, y);
-            let claim_ids = grid.entry(claim_coords).or_insert(HashSet::new());
+            let claim_ids = grid.entry(claim_coords).or_insert_with(HashSet::new);
             
             claim_ids.insert(claim.id);
         }
     }
 }
 
-fn parse_claims(input: &str) -> Vec<Claim> {
-    let mut the_list: Vec<Claim> = Vec::new();
+fn parse_claims(input: &str) -> HashSet<Claim> {
+    let mut the_list: HashSet<Claim> = HashSet::new();
     for claim_str in input.lines() {
         if claim_str.chars().count() > 0 {
-            the_list.push(claim_builder(claim_str));
+            the_list.insert(claim_builder(claim_str));
         }
     }
     the_list
@@ -77,6 +77,7 @@ fn parse_u32(slice: &str) -> u32 {
     slice.parse::<u32>().unwrap()
 }
 
+#[derive(PartialEq, Eq, Hash)]
 struct Claim {
     id: u32,
     left_edge: u32,
