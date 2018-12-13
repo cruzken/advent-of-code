@@ -7,17 +7,18 @@ pub fn main() {}
 pub fn star_one(input: &str) -> i64 {
     let mut logs: Vec<LogEntry> = Vec::new();
     for line in input.lines() {
-        logs.push(build_entry(&parse_entry(line)));
+        logs.push(build_entry(line));
     }
     logs[..].sort();
-    
+
     for entry in &logs {
         println!("{:?}", entry);
     }
     0
 }
 
-fn build_entry(parsed: &[String]) -> LogEntry {
+fn build_entry(input: &str) -> LogEntry {
+    let parsed = parse_entry(input);
     LogEntry {
         date: LogDate {
             year: parsed[0].parse::<u32>().unwrap(),
@@ -42,7 +43,7 @@ fn parse_entry(input: &str) -> Vec<String> {
         .replace("]", "")
         .replace("#", "")
         .split_whitespace()
-        .map(|x| String::from(x))
+        .map(|x| x.to_string())
         .collect()
 }
 
