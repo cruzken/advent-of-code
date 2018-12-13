@@ -1,7 +1,6 @@
 use std::collections::HashSet;
 
 #[allow(dead_code)]
-#[allow(unused_variables)]
 pub fn star_one(input: &str) -> i32 {
     let mut sum = 0;
 
@@ -12,7 +11,6 @@ pub fn star_one(input: &str) -> i32 {
 }
 
 #[allow(dead_code)]
-#[allow(unused_variables)]
 pub fn star_two(input: &str) -> i32 {
     let mut sum = 0;
     let mut history = HashSet::new();
