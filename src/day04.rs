@@ -1,6 +1,5 @@
 use std::cmp::Ordering;
-
-pub fn main() {}
+use std::collections::HashMap;
 
 #[allow(dead_code)]
 #[allow(unused_variables)]
@@ -11,9 +10,26 @@ pub fn star_one(input: &str) -> i64 {
     }
     logs[..].sort();
 
-    let sleepTimes: HashSet<LogEntry, u32>  = HashSet::new();
+    let mut sleep_times: HashMap<u32, u32>  = HashMap::new();
+    let mut guard_state: Option<u32> = None;
+    let mut fall_sleep_at: Option<u32> = None;
     for entry in &logs {
-        println!("{:?}", entry);
+        match entry.event {
+            LogEvent::BeginShift(guard_num) => {
+                guard_state = Some(guard_num);
+                println!("guard {} begins shift", guard_state.unwrap());
+            },
+            LogEvent::FallsAsleep => {
+                fall_sleep_at = Some(entry.date.minute);
+            },
+            LogEvent::WakesUp => {
+                let minutes = sleep_times.entry(guard_state.unwrap()).or_insert(0);
+                *minutes += entry.date.minute - fall_sleep_at.unwrap();
+                println!("guard {} slept for {} minutes so far", guard_state.unwrap(), *minutes);
+            },
+            _ => {},
+        }
+
     }
     0
 }
