@@ -11,6 +11,7 @@ pub fn star_one(input: &str) -> i64 {
     }
     logs[..].sort();
 
+    let sleepTimes: HashSet<LogEntry, u32>  = HashSet::new();
     for entry in &logs {
         println!("{:?}", entry);
     }
