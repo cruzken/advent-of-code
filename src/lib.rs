@@ -70,7 +70,7 @@ mod tests {
         let input = load_file("day04.txt");
 
         assert_eq!(star_one(&input), 98680);
-        assert_eq!(star_two(&input), 1);
+        assert_eq!(star_two(&input), 9763);
     }
     #[test]
     fn solve_day05() {

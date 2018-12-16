@@ -24,10 +24,6 @@ pub fn star_one(input: &str) -> u32 {
 
     let mut sleepy_guard: Vec<_> = sleep_sums.iter().collect::<Vec<_>>();
     sleepy_guard.sort_by(|a, b| b.1.cmp(a.1));
-    println!(
-        "guard {} is the sleepiest with {} minutes",
-        sleepy_guard[0].0, sleepy_guard[0].1
-    );
 
     let mut opportunity_time: Option<(u32, u32)> = None;
     for i in 0..sleep_table.len() {
@@ -40,7 +36,7 @@ pub fn star_one(input: &str) -> u32 {
             }
         }
     }
-    println!("{:?}", opportunity_time.unwrap());
+
     sleepy_guard[0].0 * opportunity_time.unwrap().0
 }
 
@@ -185,8 +181,25 @@ impl PartialEq for LogDate {
 
 #[allow(dead_code)]
 #[allow(unused_variables)]
-pub fn star_two(input: &str) -> i64 {
-    0
+pub fn star_two(input: &str) -> u32 {
+    let mut logs: Vec<LogEntry> = Vec::new();
+    for line in input.lines() {
+        logs.push(build_entry(line));
+    }
+    logs[..].sort();
+
+    let sleep_table = build_sleep_table(&logs);
+
+    let mut most_freq = (0, 0, 0);
+
+    for minute in 0..sleep_table.len() {
+        sleep_table[minute].iter().for_each(|(x, y)| {
+            if *y > most_freq.1 {
+                most_freq = (*x, *y, minute as u32);
+            }
+        });
+    }
+    most_freq.0 * most_freq.2
 }
 
 #[cfg(test)]
@@ -221,6 +234,27 @@ mod tests {
 
     #[test]
     fn test_star_two() {
-        assert_eq!(star_two(""), 1)
+        assert_eq!(
+            star_two(
+                "[1518-11-01 00:00] Guard #10 begins shift
+[1518-11-01 00:05] falls asleep
+[1518-11-01 00:25] wakes up
+[1518-11-01 00:30] falls asleep
+[1518-11-01 00:55] wakes up
+[1518-11-01 23:58] Guard #99 begins shift
+[1518-11-02 00:40] falls asleep
+[1518-11-02 00:50] wakes up
+[1518-11-03 00:05] Guard #10 begins shift
+[1518-11-03 00:24] falls asleep
+[1518-11-03 00:29] wakes up
+[1518-11-04 00:02] Guard #99 begins shift
+[1518-11-04 00:36] falls asleep
+[1518-11-04 00:46] wakes up
+[1518-11-05 00:03] Guard #99 begins shift
+[1518-11-05 00:45] falls asleep
+[1518-11-05 00:55] wakes up"
+            ),
+            4455
+        )
     }
 }
