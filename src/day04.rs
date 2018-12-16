@@ -1,37 +1,79 @@
 use std::cmp::Ordering;
 use std::collections::HashMap;
+use std::iter::repeat;
 
 #[allow(dead_code)]
 #[allow(unused_variables)]
-pub fn star_one(input: &str) -> i64 {
+pub fn star_one(input: &str) -> u32 {
     let mut logs: Vec<LogEntry> = Vec::new();
     for line in input.lines() {
         logs.push(build_entry(line));
     }
     logs[..].sort();
 
-    let mut sleep_times: HashMap<u32, u32>  = HashMap::new();
+    let sleep_table = build_sleep_table(&logs);
+
+    let mut sleep_sums: HashMap<u32, u32> = HashMap::new();
+
+    for minute in sleep_table.iter() {
+        for (guard, freq) in minute.iter() {
+            let minutes_sleep = sleep_sums.entry(*guard).or_insert(0);
+            *minutes_sleep += freq;
+        }
+    }
+
+    let mut sleepy_guard: Vec<_> = sleep_sums.iter().collect::<Vec<_>>();
+    sleepy_guard.sort_by(|a, b| b.1.cmp(a.1));
+    println!(
+        "guard {} is the sleepiest with {} minutes",
+        sleepy_guard[0].0, sleepy_guard[0].1
+    );
+
+    let mut opportunity_time: Option<(u32, u32)> = None;
+    for i in 0..sleep_table.len() {
+        if sleep_table[i].get(sleepy_guard[0].0) != None {
+            let sleep_freq = sleep_table[i].get(sleepy_guard[0].0).unwrap();
+            match opportunity_time {
+                None => opportunity_time = Some((i as u32, *sleep_freq)),
+                Some((x, y)) if *sleep_freq > y => opportunity_time = Some((i as u32, *sleep_freq)),
+                Some(_) => {}
+            }
+        }
+    }
+    println!("{:?}", opportunity_time.unwrap());
+    sleepy_guard[0].0 * opportunity_time.unwrap().0
+}
+
+fn build_sleep_table(logs: &Vec<LogEntry>) -> Vec<HashMap<u32, u32>> {
+    let mut sleep_table = repeat(HashMap::<u32, u32>::new())
+        .take(60)
+        .collect::<Vec<_>>();
+
     let mut guard_state: Option<u32> = None;
     let mut fall_sleep_at: Option<u32> = None;
-    for entry in &logs {
+
+    for entry in logs {
         match entry.event {
             LogEvent::BeginShift(guard_num) => {
                 guard_state = Some(guard_num);
-                println!("guard {} begins shift", guard_state.unwrap());
-            },
+            }
             LogEvent::FallsAsleep => {
                 fall_sleep_at = Some(entry.date.minute);
-            },
+            }
             LogEvent::WakesUp => {
-                let minutes = sleep_times.entry(guard_state.unwrap()).or_insert(0);
-                *minutes += entry.date.minute - fall_sleep_at.unwrap();
-                println!("guard {} slept for {} minutes so far", guard_state.unwrap(), *minutes);
-            },
-            _ => {},
+                for item in sleep_table
+                    .iter_mut()
+                    .take(entry.date.minute as usize)
+                    .skip(fall_sleep_at.unwrap() as usize)
+                {
+                    let counter = item.entry(guard_state.unwrap()).or_insert(0);
+                    *counter += 1;
+                }
+            }
+            _ => {}
         }
-
     }
-    0
+    sleep_table
 }
 
 fn build_entry(input: &str) -> LogEntry {
@@ -173,7 +215,7 @@ mod tests {
 [1518-11-05 00:45] falls asleep
 [1518-11-05 00:55] wakes up"
             ),
-            1
+            240
         )
     }
 
