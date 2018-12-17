@@ -1,6 +1,36 @@
+use std::collections::HashSet;
+
 #[allow(dead_code)]
-#[allow(unused_variables)]
 pub fn star_one(input: &str) -> usize {
+    reduction_len(input)
+}
+
+#[allow(dead_code)]
+pub fn star_two(input: &str) -> usize {
+    let alphabet = "abcdefghijklmnopqrstuvwxyz";
+    let mut reduced: HashSet<usize> = HashSet::new();
+    for letter in alphabet.chars() {
+        if input.contains(letter) {
+            let mut v = input.chars().collect::<Vec<_>>();
+
+            let mut i = 0;
+            while i <= v.len() - 1 {
+                if v[i] == letter || v[i] == flip_case(&letter) {
+                    v.remove(i);
+                    if i == 0 {
+                        continue;
+                    }
+                    i -= 1;
+                }
+                i += 1;
+            }
+            reduced.insert(reduction_len(&v.iter().collect::<String>()[..]));
+        }
+    }
+    *reduced.iter().min().unwrap()
+}
+
+fn reduction_len(input: &str) -> usize {
     let mut v = input.chars().collect::<Vec<_>>();
 
     let mut i = 0;
@@ -16,18 +46,13 @@ pub fn star_one(input: &str) -> usize {
     v.len()
 }
 
-#[allow(dead_code)]
-#[allow(unused_variables)]
-pub fn star_two(input: &str) -> i64 {
-    0
-}
-
 fn flip_case(letter: &char) -> char {
     if letter.is_ascii_lowercase() {
         return letter.to_ascii_uppercase();
     }
     letter.to_ascii_lowercase()
 }
+
 #[cfg(test)]
 mod tests {
     use super::{star_one, star_two};
@@ -39,6 +64,6 @@ mod tests {
 
     #[test]
     fn test_star_two() {
-        assert_eq!(star_two(""), 1)
+        assert_eq!(star_two("dabAcCaCBAcCcaDA"), 4)
     }
 }
