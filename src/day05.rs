@@ -2,7 +2,8 @@ use std::collections::HashSet;
 
 #[allow(dead_code)]
 pub fn star_one(input: &str) -> usize {
-    reduction_len(input)
+    let v = input.chars().collect::<Vec<_>>();
+    reduction_len(v)
 }
 
 #[allow(dead_code)]
@@ -24,14 +25,13 @@ pub fn star_two(input: &str) -> usize {
                 }
                 i += 1;
             }
-            reduced.insert(reduction_len(&v.iter().collect::<String>()[..]));
+            reduced.insert(reduction_len(v));
         }
     }
     *reduced.iter().min().unwrap()
 }
 
-fn reduction_len(input: &str) -> usize {
-    let mut v = input.chars().collect::<Vec<_>>();
+fn reduction_len(mut v: Vec<char>) -> usize {
 
     let mut i = 0;
     while i < v.len() - 1 {
