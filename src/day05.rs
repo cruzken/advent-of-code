@@ -8,7 +8,7 @@ pub fn star_one(input: &str) -> usize {
 
 #[allow(dead_code)]
 pub fn star_two(input: &str) -> usize {
-    let alphabet = (b'a'..=b'z' + 1)
+    let alphabet = (b'a'..=b'z')
         .map(|c| c as char)
         .filter(|c| input.contains(*c));
 
