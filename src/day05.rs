@@ -8,34 +8,25 @@ pub fn star_one(input: &str) -> usize {
 
 #[allow(dead_code)]
 pub fn star_two(input: &str) -> usize {
-    let alphabet = "abcdefghijklmnopqrstuvwxyz";
-    let mut reduced: HashSet<usize> = HashSet::new();
-    for letter in alphabet.chars() {
-        if input.contains(letter) {
-            let mut v = input.chars().collect::<Vec<_>>();
+    let alphabet = (b'a'..=b'z' + 1)
+        .map(|c| c as char)
+        .filter(|c| input.contains(*c));
 
-            let mut i = 0;
-            while i <= v.len() - 1 {
-                if v[i] == letter || v[i] == flip_case(&letter) {
-                    v.remove(i);
-                    if i == 0 {
-                        continue;
-                    }
-                    i -= 1;
-                }
-                i += 1;
-            }
-            reduced.insert(reduction_len(v));
-        }
+    let mut reduced: HashSet<usize> = HashSet::new();
+    for letter in alphabet {
+        let v = input
+            .chars()
+            .filter(|c| *c != letter && *c != flip_case(letter))
+            .collect::<Vec<_>>();
+        reduced.insert(reduction_len(v));
     }
     *reduced.iter().min().unwrap()
 }
 
 fn reduction_len(mut v: Vec<char>) -> usize {
-
     let mut i = 0;
     while i < v.len() - 1 {
-        if v[i] == flip_case(&v[i + 1]) {
+        if v[i] == flip_case(v[i + 1]) {
             v.remove(i + 1);
             v.remove(i);
             i = 0;
@@ -46,7 +37,7 @@ fn reduction_len(mut v: Vec<char>) -> usize {
     v.len()
 }
 
-fn flip_case(letter: &char) -> char {
+fn flip_case(letter: char) -> char {
     if letter.is_ascii_lowercase() {
         return letter.to_ascii_uppercase();
     }
