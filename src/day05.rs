@@ -8,18 +8,18 @@ pub fn star_one(input: &str) -> usize {
 
 #[allow(dead_code)]
 pub fn star_two(input: &str) -> usize {
-    let alphabet = (b'a'..=b'z')
+    let reduced = (b'a'..b'z' + 1)
         .map(|c| c as char)
-        .filter(|c| input.contains(*c));
+        .filter(|c| input.contains(*c))
+        .map(|x| {
+            let v = input
+                .chars()
+                .filter(|c| *c != x && *c != flip_case(x))
+                .collect::<Vec<_>>();
+            reduction_len(v)
+        })
+        .collect::<HashSet<usize>>();
 
-    let mut reduced: HashSet<usize> = HashSet::new();
-    for letter in alphabet {
-        let v = input
-            .chars()
-            .filter(|c| *c != letter && *c != flip_case(letter))
-            .collect::<Vec<_>>();
-        reduced.insert(reduction_len(v));
-    }
     *reduced.iter().min().unwrap()
 }
 
