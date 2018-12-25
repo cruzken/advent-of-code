@@ -1,5 +1,3 @@
-use std::collections::HashSet;
-
 #[allow(dead_code)]
 pub fn star_one(input: &str) -> usize {
     let v = input.chars().collect::<Vec<_>>();
@@ -8,7 +6,7 @@ pub fn star_one(input: &str) -> usize {
 
 #[allow(dead_code)]
 pub fn star_two(input: &str) -> usize {
-    let reduced = (b'a'..b'z' + 1)
+    (b'a'..b'z' + 1)
         .map(|c| c as char)
         .filter(|c| input.contains(*c))
         .map(|x| {
@@ -18,9 +16,8 @@ pub fn star_two(input: &str) -> usize {
                 .collect::<Vec<_>>();
             reduction_len(v)
         })
-        .collect::<HashSet<usize>>();
-
-    *reduced.iter().min().unwrap()
+        .min()
+        .unwrap()
 }
 
 fn reduction_len(mut v: Vec<char>) -> usize {
