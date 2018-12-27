@@ -1,3 +1,5 @@
+use std::mem;
+
 #[allow(dead_code)]
 pub fn star_one(input: &str) -> usize {
     let v = input.chars().collect::<Vec<_>>();
@@ -21,17 +23,29 @@ pub fn star_two(input: &str) -> usize {
 }
 
 fn reduction_len(mut v: Vec<char>) -> usize {
-    let mut i = 0;
-    while i < v.len() - 1 {
-        if v[i] == flip_case(v[i + 1]) {
-            v.remove(i + 1);
-            v.remove(i);
-            i = 0;
-        } else {
+    let first_count = v.len();
+    let mut removed_count = 0;
+    let mut reduced: Vec<char> = Vec::new();
+    loop {
+        let mut i = 0;
+        let mut reacted = false;
+        while i < v.len() - 1 {
+            if v[i] == flip_case(v[i + 1]) {
+                reacted = true;
+                i += 2;
+                removed_count += 2;
+                continue;
+            }
+            reduced.push(v[i]);
             i += 1;
         }
+        mem::swap(&mut v, &mut reduced);
+        reduced.clear();
+        if !reacted {
+            break;
+        }
     }
-    v.len()
+    first_count - removed_count
 }
 
 fn flip_case(letter: char) -> char {
