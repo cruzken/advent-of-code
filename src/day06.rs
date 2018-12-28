@@ -1,22 +1,71 @@
+use std::collections::BTreeMap;
+use std::collections::HashMap;
 use std::collections::HashSet;
 
 #[allow(dead_code)]
-pub fn star_one(input: &str) -> i32 {
+pub fn star_one(input: &str) -> u32 {
     let coords = build_coords(input);
     // get grid's boundaries
     let bounds = grid_bounds(&coords);
     println!(
-        "x-bounds: {},{} y-bounds: {},{}",
+        "x-bounds: {},{}\n y-bounds: {},{}",
         bounds.0, bounds.1, bounds.2, bounds.3
     );
     // filter out coords with infinite areas (on the grid boundaries)
-    let infinite_points = coords
+    let finite_points = coords
         .iter()
-        .filter(|x| has_infinite(x, bounds));
-    println!("{:?}", infinite_points.collect::<Vec<_>>());
+        .filter(|x| !has_infinite(x, bounds))
+        .collect::<Vec<_>>();
+    println!("{:?}\n", finite_points);
     // build grid data calculating distance per point per grid coord
+    let grid = build_grid(&coords, &bounds);
+    // get areas of coords with finite areas
+    *finite_areas(&grid, &finite_points).iter().max().unwrap()
+}
 
-    0
+fn finite_areas(grid: &HashMap<Point, BTreeMap<i32, HashSet<Point>>>, finite_points: &Vec<&Point>) -> HashSet<u32> {
+
+    let mut distances = HashSet::new();
+
+    for point in finite_points.iter() {
+        let mut count = 0;
+
+        for (.., dlist) in grid.iter() {
+            let (.., closest) = dlist.iter().next().unwrap();
+            if closest.len() == 1 && closest.contains(point) {
+                // println!("{:?} closest to {:?}", point, grid_point);
+                count += 1;
+            }
+        }
+
+        println!("{:?} has finite area of {}", point, count);
+        distances.insert(count);
+    }
+    distances
+}
+
+// definately needs refactor
+fn build_grid(
+    coords: &HashSet<Point>,
+    bounds: &(i32, i32, i32, i32),
+) -> HashMap<Point, BTreeMap<i32, HashSet<Point>>> {
+    let mut grid = HashMap::new();
+
+    for x in bounds.0..=bounds.1 {
+        for y in bounds.2..=bounds.3 {
+            let point = Point { x, y };
+            let distances = grid.entry(Point { x, y }).or_insert(BTreeMap::new());
+
+            for entry in coords.iter().map(|p| (p.distance(&point), p)) {
+                let distances_list = distances.entry(entry.0).or_insert(HashSet::new());
+                distances_list.insert(Point {
+                    x: entry.1.x,
+                    y: entry.1.y,
+                });
+            }
+        }
+    }
+    grid
 }
 
 fn has_infinite(point: &Point, bounds: (i32, i32, i32, i32)) -> bool {
@@ -107,7 +156,7 @@ mod tests {
 5, 5
 8, 9"
             ),
-            1
+            17
         )
     }
 
