@@ -1,6 +1,4 @@
-use std::collections::BTreeMap;
-use std::collections::HashMap;
-use std::collections::HashSet;
+use std::collections::{BTreeMap, HashMap, HashSet};
 
 #[allow(dead_code)]
 pub fn star_one(input: &str) -> u32 {
@@ -21,11 +19,33 @@ pub fn star_one(input: &str) -> u32 {
     *finite_areas(&grid, &finite).iter().max().unwrap()
 }
 
+#[allow(dead_code)]
+#[allow(unused_variables)]
+pub fn star_two(input: &str, limit: i32) -> usize {
+    // parse input to coords
+    let coords = build_coords(input);
+
+    // get grid's boundaries
+    let bounds = grid_bounds(&coords);
+
+    // build grid data calculating distance per point per grid coord
+    let grid = build_grid(&coords, &bounds);
+
+    // return region area that is under the limit
+    grid.iter()
+        .map(|(.., dlist)| {
+            dlist
+                .iter()
+                .fold(0, |acc, (dist, points)| acc + (dist * points.len() as i32))
+        })
+        .filter(|x| *x < limit)
+        .count()
+}
+
 fn infinite_points(
     grid: &HashMap<Point, BTreeMap<i32, HashSet<Point>>>,
     bounds: &(i32, i32, i32, i32),
 ) -> HashSet<Point> {
-    // get list of points with infinite areas
     let mut infinite_points = HashSet::new();
 
     for x in bounds.0..=bounds.1 {
@@ -37,7 +57,10 @@ fn infinite_points(
 
                 if dlist.len() == 1 {
                     let copy = dlist.iter().next().unwrap();
-                    infinite_points.insert(Point {x: copy.x, y: copy.y});
+                    infinite_points.insert(Point {
+                        x: copy.x,
+                        y: copy.y,
+                    });
                 }
             }
         }
@@ -66,7 +89,6 @@ fn finite_areas(
     distances
 }
 
-// definately needs refactor
 fn build_grid(
     coords: &HashSet<Point>,
     bounds: &(i32, i32, i32, i32),
@@ -76,13 +98,13 @@ fn build_grid(
     for x in bounds.0..=bounds.1 {
         for y in bounds.2..=bounds.3 {
             let point = Point { x, y };
-            let distances = grid.entry(Point { x, y }).or_insert(BTreeMap::new());
+            let distances = grid.entry(Point { x, y }).or_insert_with(BTreeMap::new);
 
-            for entry in coords.iter().map(|p| (p.distance(&point), p)) {
-                let distances_list = distances.entry(entry.0).or_insert(HashSet::new());
+            for (distance, entry) in coords.iter().map(|p| (p.distance(&point), p)) {
+                let distances_list = distances.entry(distance).or_insert_with(HashSet::new);
                 distances_list.insert(Point {
-                    x: entry.1.x,
-                    y: entry.1.y,
+                    x: entry.x,
+                    y: entry.y,
                 });
             }
         }
@@ -90,12 +112,7 @@ fn build_grid(
     grid
 }
 
-#[allow(dead_code)]
-#[allow(unused_variables)]
-pub fn star_two(input: &str) -> i64 {
-    0
-}
-
+// need to refactor
 fn grid_bounds(coords: &HashSet<Point>) -> (i32, i32, i32, i32) {
     let min_x = coords.iter().fold(std::i32::MAX, |lowest, point| {
         if point.x < lowest {
@@ -141,7 +158,7 @@ fn build_point(input: &str) -> Point {
     }
 }
 
-#[derive(Debug, Hash, Eq)]
+#[derive(Hash, PartialEq, Eq, Debug)]
 struct Point {
     x: i32,
     y: i32,
@@ -150,12 +167,6 @@ struct Point {
 impl Point {
     pub fn distance(&self, other: &Point) -> i32 {
         (self.x - other.x).abs() + (self.y - other.y).abs()
-    }
-}
-
-impl PartialEq for Point {
-    fn eq(&self, other: &Point) -> bool {
-        self.x == other.x && self.y == other.y
     }
 }
 
@@ -180,6 +191,17 @@ mod tests {
 
     #[test]
     fn test_star_two() {
-        assert_eq!(star_two(""), 1)
+        assert_eq!(
+            star_two(
+                "1, 1
+1, 6
+8, 3
+3, 4
+5, 5
+8, 9",
+                32
+            ),
+            16
+        )
     }
 }
