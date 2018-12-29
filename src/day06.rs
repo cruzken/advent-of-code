@@ -4,27 +4,51 @@ use std::collections::HashSet;
 
 #[allow(dead_code)]
 pub fn star_one(input: &str) -> u32 {
+    // parse input to coords
     let coords = build_coords(input);
+
     // get grid's boundaries
     let bounds = grid_bounds(&coords);
-    println!(
-        "x-bounds: {},{}\n y-bounds: {},{}",
-        bounds.0, bounds.1, bounds.2, bounds.3
-    );
-    // filter out coords with infinite areas (on the grid boundaries)
-    let finite_points = coords
-        .iter()
-        .filter(|x| !has_infinite(x, bounds))
-        .collect::<Vec<_>>();
-    println!("{:?}\n", finite_points);
+
     // build grid data calculating distance per point per grid coord
     let grid = build_grid(&coords, &bounds);
+
+    // find the points with finite areas
+    let inf = infinite_points(&grid, &bounds);
+    let finite = coords.difference(&inf).collect::<HashSet<_>>();
+
     // get areas of coords with finite areas
-    *finite_areas(&grid, &finite_points).iter().max().unwrap()
+    *finite_areas(&grid, &finite).iter().max().unwrap()
 }
 
-fn finite_areas(grid: &HashMap<Point, BTreeMap<i32, HashSet<Point>>>, finite_points: &Vec<&Point>) -> HashSet<u32> {
+fn infinite_points(
+    grid: &HashMap<Point, BTreeMap<i32, HashSet<Point>>>,
+    bounds: &(i32, i32, i32, i32),
+) -> HashSet<Point> {
+    // get list of points with infinite areas
+    let mut infinite_points = HashSet::new();
 
+    for x in bounds.0..=bounds.1 {
+        for y in bounds.2..=bounds.3 {
+            // Only check the parameter
+            if x == bounds.0 || x == bounds.1 || y == bounds.2 || y == bounds.3 {
+                let point = Point { x, y };
+                let (.., dlist) = grid.get(&point).unwrap().iter().next().unwrap();
+
+                if dlist.len() == 1 {
+                    let copy = dlist.iter().next().unwrap();
+                    infinite_points.insert(Point {x: copy.x, y: copy.y});
+                }
+            }
+        }
+    }
+    infinite_points
+}
+
+fn finite_areas(
+    grid: &HashMap<Point, BTreeMap<i32, HashSet<Point>>>,
+    finite_points: &HashSet<&Point>,
+) -> HashSet<u32> {
     let mut distances = HashSet::new();
 
     for point in finite_points.iter() {
@@ -33,12 +57,10 @@ fn finite_areas(grid: &HashMap<Point, BTreeMap<i32, HashSet<Point>>>, finite_poi
         for (.., dlist) in grid.iter() {
             let (.., closest) = dlist.iter().next().unwrap();
             if closest.len() == 1 && closest.contains(point) {
-                // println!("{:?} closest to {:?}", point, grid_point);
                 count += 1;
             }
         }
 
-        println!("{:?} has finite area of {}", point, count);
         distances.insert(count);
     }
     distances
@@ -66,10 +88,6 @@ fn build_grid(
         }
     }
     grid
-}
-
-fn has_infinite(point: &Point, bounds: (i32, i32, i32, i32)) -> bool {
-    point.x == bounds.0 || point.x == bounds.1 || point.y == bounds.2 || point.y == bounds.3
 }
 
 #[allow(dead_code)]
