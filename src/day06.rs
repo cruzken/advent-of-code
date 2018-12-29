@@ -20,7 +20,6 @@ pub fn star_one(input: &str) -> u32 {
 }
 
 #[allow(dead_code)]
-#[allow(unused_variables)]
 pub fn star_two(input: &str, limit: i32) -> usize {
     // parse input to coords
     let coords = build_coords(input);
