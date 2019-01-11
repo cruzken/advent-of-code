@@ -1,6 +1,11 @@
 #[allow(dead_code)]
 #[allow(unused_variables)]
 pub fn star_one(input: &str) -> i64 {
+    // insert first character mention in the dependency pool
+    // build BTreeMap of chars with BTreeSet of dependencies
+    // iterate through the map
+    // insert key to pool if dependencies are fufilled
+    // exit the loop if there is no missing dependencies
     0
 }
 
@@ -16,13 +21,18 @@ mod tests {
 
     #[test]
     fn test_star_one() {
-        assert_eq!(star_one("Step C must be finished before step A can begin.
+        assert_eq!(
+            star_one(
+                "Step C must be finished before step A can begin.
 Step C must be finished before step F can begin.
 Step A must be finished before step B can begin.
 Step A must be finished before step D can begin.
 Step B must be finished before step E can begin.
 Step D must be finished before step E can begin.
-Step F must be finished before step E can begin."), 1)
+Step F must be finished before step E can begin."
+            ),
+            1
+        )
     }
 
     #[test]
