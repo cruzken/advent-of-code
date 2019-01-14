@@ -1,60 +1,78 @@
 use std::collections::BTreeMap;
 use std::collections::BTreeSet;
+use std::collections::HashSet;
 
 #[allow(dead_code)]
 #[allow(unused_variables)]
 pub fn star_one(input: &str) -> String {
-    // insert first character mention in the dependency pool
-    // build BTreeMap of chars with BTreeSet of dependencies
-    // iterate through the map
-    // insert key to pool if dependencies are fufilled
-    // exit the loop if there is no missing dependencies
-    let mut result = String::new();
-    let mut depended_by: BTreeMap<&str, BTreeSet<&str>> = BTreeMap::new();
+    let mut order = String::new();
+    let mut depended_by = dep_builder(input);
+    let mut available: BTreeSet<&str> = BTreeSet::new();
+
+    // 1. list all dependencies that start first and store in the available pool
+    for (.., set) in depended_by.iter() {
+        for entry in set.iter() {
+            if !depended_by.contains_key(entry) {
+                available.insert(entry);
+            }
+        }
+    }
+
+    // 2. repeat 3-6 until available pool is empty
+    while !available.is_empty() {
+        // 3. remove the lowest character in the available pool
+        let clone = available.clone();
+        let lowest = clone.iter().next().unwrap();
+        available.remove(lowest);
+
+        // 4. store that character in the order string.
+        order.push_str(lowest);
+
+        // 5. remove that character from all characters dependencies
+        for (key, set) in &mut depended_by {
+            set.remove(lowest);
+        }
+
+        // 6. remove all characters that don't have dependencies and store them into available pool
+        for (key, set) in depended_by.clone() {
+            if set.is_empty() {
+                depended_by.remove(key);
+                available.insert(key);
+            }
+        }
+    }
+
+    // 7. output the order string
+    order
+}
+
+fn dep_builder(input: &str) -> BTreeMap<&str, HashSet<&str>> {
+    let mut depended_by: BTreeMap<&str, HashSet<&str>> = BTreeMap::new();
     for line in input.lines() {
         if line.chars().count() > 0 {
             let parsed = line.split_whitespace().collect::<Vec<_>>();
-            let entry = depended_by.entry(parsed[7]).or_insert_with(BTreeSet::new);
+            let entry = depended_by.entry(parsed[7]).or_insert_with(HashSet::new);
             entry.insert(parsed[1]);
         }
     }
-    for dependencies in depended_by.iter() {
-        println!("{:?} needs {:?}", dependencies.0, dependencies.1);
-    }
-
-    loop {
-        let mut missing_dependencies = false;
-        for dependencies in depended_by.iter() {
-            if result.is_empty() {
-                for entry in dependencies.1 {
-                    result.push_str(entry);
-                }
-            }
-            if result[..].contains(dependencies.0) {
-                continue;
-            }
-            if has_dependencies(&result, &dependencies.1) {
-                result.push_str(dependencies.0);
-            } else {
-                missing_dependencies = true;
-            }
-        }
-        if !missing_dependencies {
-            break;
-        }
-    }
-    result
+    depended_by
 }
 
-fn has_dependencies(result: &str, required: &BTreeSet<&str>) -> bool {
-    let mut check = true;
-    for entry in required {
-        if !result[..].contains(entry) {
-            check = false;
-            break;
+trait Checker {
+    fn contains_set(&self, set: &HashSet<&str>) -> bool;
+}
+
+impl Checker for String {
+    fn contains_set(&self, set: &HashSet<&str>) -> bool {
+        let mut check = true;
+        for entry in set {
+            if !self.contains(entry) {
+                check = false;
+                break;
+            }
         }
+        check
     }
-    check
 }
 
 #[allow(dead_code)]
