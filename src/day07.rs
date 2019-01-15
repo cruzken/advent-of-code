@@ -3,7 +3,6 @@ use std::collections::BTreeSet;
 use std::collections::HashSet;
 
 #[allow(dead_code)]
-#[allow(unused_variables)]
 pub fn star_one(input: &str) -> String {
     let mut order = String::new();
     let mut depended_by = dep_builder(input);
@@ -29,7 +28,7 @@ pub fn star_one(input: &str) -> String {
         order.push_str(lowest);
 
         // 5. remove that character from all characters dependencies
-        for (key, set) in &mut depended_by {
+        for (.., set) in &mut depended_by {
             set.remove(lowest);
         }
 
