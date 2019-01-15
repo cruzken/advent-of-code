@@ -77,6 +77,14 @@ impl Checker for String {
 #[allow(dead_code)]
 #[allow(unused_variables)]
 pub fn star_two(input: &str) -> i64 {
+    // 1. update tick
+    // 2. subtract 1 second from all current workers working
+    // 3. if worker is finished a step, place step to DONE pool and worker is idle
+    // 4. remove the latest finished characters that are dependencies for all characters
+    // 5. get all available chars and place in pool.
+    // 6. push lowest character from pool to an available worker. Repeat until pool is empty or all workers busy.
+    // 7. break loop when available pool is empty and all workers are idle
+    // 8. output seconds ticked
     0
 }
 
