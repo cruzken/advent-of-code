@@ -46,20 +46,42 @@ pub fn star_one(input: &str) -> String {
 }
 
 #[allow(dead_code)]
-pub fn star_two(input: &str, workers: u8) -> i64 {
+pub fn star_two(input: &str, num: usize) -> u32 {
     let mut order = String::new();
     let mut depended_by = dep_builder(input);
     let mut available: BTreeSet<&str> = BTreeSet::new();
-
-    // 1. update tick
-    // 2. subtract 1 second from all current workers working
+    let mut ticks = 0;
+    let workers = spawn_workers(num);
+    loop {
+        // 1. update tick
+        ticks += 1;
+        // 2. subtract 1 second from all current workers working
+        for mut worker in workers {
+            if worker.step != None {
+                worker.time -= 1;
+            }
+            if worker.time == 0 {
+                order.push_str(worker.step.unwrap());
+                worker.set(None, 0);
+            }
+        }
+        break;
+    }
     // 3. if worker is finished a step, place step to DONE pool and worker is idle
     // 4. remove the latest finished characters that are dependencies for all characters
     // 5. get all available chars and place in pool.
     // 6. push lowest character from pool to an available worker. Repeat until pool is empty or all workers busy.
     // 7. break loop when available pool is empty and all workers are idle
     // 8. output seconds ticked
-    0
+    ticks
+}
+
+fn spawn_workers<'a>(num: usize) -> Vec<Worker<'a>> {
+    let mut workers = Vec::new();
+    while workers.len() < num {
+        workers.push(Worker::new());
+    }
+    workers
 }
 
 struct Worker<'a> {
