@@ -60,16 +60,29 @@ pub fn star_two(input: &str, num: usize) -> u32 {
             if worker.step != None {
                 worker.time -= 1;
             }
+            // 3. if worker is finished a step, place step to DONE pool and worker is idle
             if worker.time == 0 {
-                order.push_str(worker.step.unwrap());
+                let finished_step = worker.step.unwrap();
+                order.push_str(finished_step);
                 worker.set(None, 0);
+
+                // 4. remove the finished step that are dependencies for all characters
+                for (.., set) in &mut depended_by {
+                    set.remove(finished_step);
+                }
+            }
+
+        }
+        // 5. get all available chars and place in pool.
+        for (key, set) in depended_by.clone() {
+            if set.is_empty() {
+                depended_by.remove(key);
+                available.insert(key);
             }
         }
+
         break;
     }
-    // 3. if worker is finished a step, place step to DONE pool and worker is idle
-    // 4. remove the latest finished characters that are dependencies for all characters
-    // 5. get all available chars and place in pool.
     // 6. push lowest character from pool to an available worker. Repeat until pool is empty or all workers busy.
     // 7. break loop when available pool is empty and all workers are idle
     // 8. output seconds ticked
