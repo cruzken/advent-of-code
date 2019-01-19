@@ -51,12 +51,12 @@ pub fn star_two(input: &str, num: usize) -> u32 {
     let mut depended_by = dep_builder(input);
     let mut available: BTreeSet<&str> = BTreeSet::new();
     let mut ticks = 0;
-    let workers = spawn_workers(num);
+    let mut workers = spawn_workers(num);
     loop {
         // 1. update tick
         ticks += 1;
         // 2. subtract 1 second from all current workers working
-        for mut worker in workers {
+        for mut worker in workers.iter_mut() {
             if worker.step != None {
                 worker.time -= 1;
             }
@@ -71,7 +71,6 @@ pub fn star_two(input: &str, num: usize) -> u32 {
                     set.remove(finished_step);
                 }
             }
-
         }
         // 5. get all available chars and place in pool.
         for (key, set) in depended_by.clone() {
@@ -80,11 +79,22 @@ pub fn star_two(input: &str, num: usize) -> u32 {
                 available.insert(key);
             }
         }
-
-        break;
+        // 6. push lowest character from pool to an available worker. Repeat until pool is empty or all workers busy.
+        for worker in workers.iter_mut().filter(|x| x.step == None) {
+            if available.is_empty() {
+                break;
+            }
+            let clone = available.clone();
+            let lowest = clone.iter().next().unwrap();
+            available.remove(lowest);
+            worker.set(Some(lowest), 60); // requires step time calculation function
+        }
+        // 7. break loop when available pool is empty and all workers are idle
+        if available.is_empty() && workers.iter().filter(|x| x.step == None).count() == workers.len()
+        {
+            break;
+        }
     }
-    // 6. push lowest character from pool to an available worker. Repeat until pool is empty or all workers busy.
-    // 7. break loop when available pool is empty and all workers are idle
     // 8. output seconds ticked
     ticks
 }
