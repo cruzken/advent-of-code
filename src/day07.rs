@@ -52,6 +52,16 @@ pub fn star_two(input: &str, num: usize) -> u32 {
     let mut available: BTreeSet<&str> = BTreeSet::new();
     let mut ticks = 0;
     let mut workers = spawn_workers(num);
+
+    // 0. list all dependencies that start first and store in the available pool
+    for (.., set) in depended_by.iter() {
+        for entry in set.iter() {
+            if !depended_by.contains_key(entry) {
+                available.insert(entry);
+            }
+        }
+    }
+
     loop {
         // 1. update tick
         ticks += 1;
@@ -61,7 +71,7 @@ pub fn star_two(input: &str, num: usize) -> u32 {
                 worker.time -= 1;
             }
             // 3. if worker is finished a step, place step to DONE pool and worker is idle
-            if worker.time == 0 {
+            if worker.time == 0 && worker.step != None {
                 let finished_step = worker.step.unwrap();
                 order.push_str(finished_step);
                 worker.set(None, 0);
@@ -90,9 +100,17 @@ pub fn star_two(input: &str, num: usize) -> u32 {
             worker.set(Some(lowest), 60); // requires step time calculation function
         }
         // 7. break loop when available pool is empty and all workers are idle
-        if available.is_empty() && workers.iter().filter(|x| x.step == None).count() == workers.len()
+        if available.is_empty()
+            && workers.iter().filter(|x| x.step == None).count() == workers.len()
         {
+            println!("loop is finished");
             break;
+        }
+
+        // debug stuff
+        println!("current tick: {}", ticks);
+        for (index, worker) in workers.iter().enumerate() {
+            println!("worker {}: {:?} {}", index, worker.step, worker.time);
         }
     }
     // 8. output seconds ticked
@@ -177,6 +195,18 @@ Step F must be finished before step E can begin."
 
     #[test]
     fn test_star_two() {
-        assert_eq!(star_two(""), 1)
+        assert_eq!(
+            star_two(
+                "Step C must be finished before step A can begin.
+Step C must be finished before step F can begin.
+Step A must be finished before step B can begin.
+Step A must be finished before step D can begin.
+Step B must be finished before step E can begin.
+Step D must be finished before step E can begin.
+Step F must be finished before step E can begin.",
+                15
+            ),
+            1
+        )
     }
 }
