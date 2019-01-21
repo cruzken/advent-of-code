@@ -97,7 +97,7 @@ mod tests {
         let input = load_file("day07.txt");
 
         assert_eq!(star_one(&input), String::from("BFGKNRTWXIHPUMLQVZOYJACDSE"));
-        assert_eq!(star_two(&input), 1);
+        assert_eq!(star_two(&input, 5, 61), 1);
     }
     #[test]
     fn solve_day08() {

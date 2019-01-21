@@ -1,5 +1,6 @@
 use std::collections::BTreeMap;
 use std::collections::BTreeSet;
+use std::collections::HashMap;
 use std::collections::HashSet;
 
 #[allow(dead_code)]
@@ -46,12 +47,12 @@ pub fn star_one(input: &str) -> String {
 }
 
 #[allow(dead_code)]
-pub fn star_two(input: &str, num: usize) -> u32 {
+pub fn star_two(input: &str, workers: usize, time: u32) -> u32 {
     let mut order = String::new();
     let mut depended_by = dep_builder(input);
     let mut available: BTreeSet<&str> = BTreeSet::new();
     let mut ticks = 0;
-    let mut workers = spawn_workers(num);
+    let mut workers = spawn_workers(workers);
 
     // 0. list all dependencies that start first and store in the available pool
     for (.., set) in depended_by.iter() {
@@ -63,33 +64,31 @@ pub fn star_two(input: &str, num: usize) -> u32 {
     }
 
     loop {
-        // 1. update tick
-        ticks += 1;
-        // 2. subtract 1 second from all current workers working
+        // 1. subtract 1 second from all current workers working
         for mut worker in workers.iter_mut() {
             if worker.step != None {
                 worker.time -= 1;
             }
-            // 3. if worker is finished a step, place step to DONE pool and worker is idle
+            // 2. if worker is finished a step, place step to DONE pool and worker is idle
             if worker.time == 0 && worker.step != None {
                 let finished_step = worker.step.unwrap();
                 order.push_str(finished_step);
                 worker.set(None, 0);
 
-                // 4. remove the finished step that are dependencies for all characters
+                // 3. remove the finished step that are dependencies for all characters
                 for (.., set) in &mut depended_by {
                     set.remove(finished_step);
                 }
             }
         }
-        // 5. get all available chars and place in pool.
+        // 4. get all available chars and place in pool.
         for (key, set) in depended_by.clone() {
             if set.is_empty() {
                 depended_by.remove(key);
                 available.insert(key);
             }
         }
-        // 6. push lowest character from pool to an available worker. Repeat until pool is empty or all workers busy.
+        // 5. push lowest character from pool to an available worker. Repeat until pool is empty or all workers busy.
         for worker in workers.iter_mut().filter(|x| x.step == None) {
             if available.is_empty() {
                 break;
@@ -97,9 +96,9 @@ pub fn star_two(input: &str, num: usize) -> u32 {
             let clone = available.clone();
             let lowest = clone.iter().next().unwrap();
             available.remove(lowest);
-            worker.set(Some(lowest), 60); // requires step time calculation function
+            worker.set(Some(lowest), calc_time(lowest, time)); // requires step time calculation function
         }
-        // 7. break loop when available pool is empty and all workers are idle
+        // 6. break loop when available pool is empty and all workers are idle
         if available.is_empty()
             && workers.iter().filter(|x| x.step == None).count() == workers.len()
         {
@@ -107,14 +106,21 @@ pub fn star_two(input: &str, num: usize) -> u32 {
             break;
         }
 
-        // debug stuff
-        println!("current tick: {}", ticks);
-        for (index, worker) in workers.iter().enumerate() {
-            println!("worker {}: {:?} {}", index, worker.step, worker.time);
-        }
+        // 7. update tick
+        ticks += 1;
     }
     // 8. output seconds ticked
     ticks
+}
+
+fn calc_time(step: &str, initial: u32) -> u32 {
+    let points: HashMap<u8, u32> = (b'A'..=b'Z').zip(0..).collect();
+    let query = step.chars().next().unwrap() as u8;
+    let time = points.get(&query);
+    match time {
+        Some(x) => x + initial,
+        None => 0,
+    }
 }
 
 fn spawn_workers<'a>(num: usize) -> Vec<Worker<'a>> {
@@ -204,9 +210,9 @@ Step A must be finished before step D can begin.
 Step B must be finished before step E can begin.
 Step D must be finished before step E can begin.
 Step F must be finished before step E can begin.",
-                15
+2, 1
             ),
-            1
+            15
         )
     }
 }
