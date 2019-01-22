@@ -15,6 +15,11 @@ pub fn star_two(input: &str) -> i64 {
     0
 }
 
+struct Node {
+    children: Option<Vec<Node>>,
+    metadata: Vec<u32>,
+}
+
 #[cfg(test)]
 mod tests {
     use super::{star_one, star_two};
