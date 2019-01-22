@@ -114,7 +114,7 @@ pub fn star_two(input: &str, workers: usize, time: u32) -> u32 {
 }
 
 fn calc_time(step: &str, initial: u32) -> u32 {
-    let points: HashMap<u8, u32> = (b'A'..=b'Z').zip(0..).collect();
+    let points: HashMap<u8, u32> = (b'A'..=b'Z').zip(1..).collect();
     let query = step.chars().next().unwrap() as u8;
     let time = points.get(&query);
     match time {
@@ -210,7 +210,7 @@ Step A must be finished before step D can begin.
 Step B must be finished before step E can begin.
 Step D must be finished before step E can begin.
 Step F must be finished before step E can begin.",
-2, 1
+2, 0
             ),
             15
         )
