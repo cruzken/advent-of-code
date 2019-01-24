@@ -5,7 +5,8 @@ pub fn star_one(input: &str) -> i64 {
         .split_whitespace()
         .map(|x| x.parse().unwrap())
         .collect();
-    println!("{:?}", data);
+    node_build(&data);
+
     0
 }
 
@@ -15,9 +16,18 @@ pub fn star_two(input: &str) -> i64 {
     0
 }
 
-struct Node {
-    children: Option<Vec<Node>>,
-    metadata: Vec<u32>,
+fn node_build(slice: &[u32]) -> u32 {
+    // get header
+    let children = slice[0];
+    let md_entries = slice[1];
+
+    // recursive fn:
+    // get header info (child_num, md_num)
+    // if has children, make a children slice, else get slice of metadata
+    // get the children slice header info
+    // if has children, make a child slice, else get slice of metadata
+    // else slice of metadata is after header
+    1
 }
 
 #[cfg(test)]
