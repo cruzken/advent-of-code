@@ -18,40 +18,65 @@ pub fn star_two(input: &str) -> i64 {
 
 fn node_build(slice: &[u32]) -> u32 {
     // get header
+    let mut header_pos = 0;
     let mut sum = 0;
-    let (children, md_entries) = (slice[0], slice[1] as usize);
 
-    if children > 0 {
-        children_parser(&slice[2..]); // returns md_sum, and position where children slice ends
-    } else {
-        let mut next_header = 0;
-        loop {
-            let md_slice = &slice[2..md_entries + 2];
-            sum += md_sum(md_slice);
-            next_header = 2 + md_entries;
-            if next_header >= slice.len() {
-                break;
-            }
+    println!("{:?}", slice);
+    while header_pos < slice.len() {
+        let (children, md_length) = (slice[header_pos], slice[header_pos + 1] as usize);
+
+        // base case
+        if children < 1 {
+        } else {
+            // recursive case
+
+            // make a slice of root slice minus the header
+            // pass through fn children(slice, child_num)
+            // fn children returns the sum calculated inside and header position
+            println!("child slice to parse: {:?}", &slice[(header_pos + 2)..]);
+            let (child_sum, ending_pos) = child_parser(&slice[(header_pos + 2)..], children);
+            sum += child_sum;
+            header_pos += 2 + ending_pos;
         }
-        // get metadata slice and sum the total
-        // get next header position
-        // break loop if next header position is bigger than slice length
+        let md_slice = &slice[(header_pos + 1)..(header_pos + md_length + 1)];
+        println!("slice to sum {:?}", md_slice);
+        sum += md_sum(md_slice);
+        header_pos += 2 + md_length;
     }
-    // recursive fn:
-    // get header info (child_num, md_num)
-    // if has children, make a children slice, else get slice of metadata
-    // get the children slice header info
-    // if has children, make a child slice, else get slice of metadata
-    // else slice of metadata is after header
-    1
+
+    println!("sum is {}", &sum);
+    sum
 }
 
-fn children_parser(slice: &[u32]) -> (u32, usize) {
-    let (children, md_entries) = (slice[0], slice[1]);
-    if children > 0 {
-        children_parser(&slice[2..]);
+fn child_parser(slice: &[u32], child_num: u32) -> (u32, usize) {
+    let mut header_pos = 0;
+    let mut sum = 0;
+
+    for _i in 0..child_num {
+        let (children, md_length) = (slice[header_pos], slice[header_pos + 1] as usize);
+        if children < 1 {
+            let md_slice = &slice[(header_pos + 2)..(header_pos + md_length + 2)];
+            println!("slice to sum {:?}", md_slice);
+            sum += md_sum(md_slice);
+            header_pos += 2 + md_length;
+        } else {
+            // recursive case
+
+            // make a slice of root slice minus the header
+            // pass through fn children(slice, child_num)
+            // fn children returns the sum calculated inside and header position
+            let (child_sum, ending_pos) = child_parser(&slice[(header_pos + 2)..], children);
+            sum += child_sum;
+            header_pos += 2 + ending_pos;
+            let (md_index1, md_index2) = ((header_pos), (header_pos + md_length));
+            println!("slice is indexes [{} to {}]", md_index1, md_index2);
+            let md_slice = &slice[md_index1..md_index2];
+            println!("slice to sum {:?}", md_slice);
+            sum += md_sum(md_slice);
+        }
     }
-    (0, 0)
+
+    (sum, header_pos)
 }
 
 fn md_sum(slice: &[u32]) -> u32 {
