@@ -1,3 +1,5 @@
+// Needs a bigger stack size to run. 
+// Add env variable when using cargo: RUST_MIN_STACK=8388608
 #[allow(dead_code)]
 #[allow(unused_variables)]
 pub fn star_one(input: &str) -> u32 {
