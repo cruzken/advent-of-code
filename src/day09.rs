@@ -16,7 +16,11 @@ mod tests {
 
     #[test]
     fn test_star_one() {
-        assert_eq!(star_one(""), 1)
+        assert_eq!(star_one("10 players; last marble is worth 1618 points"), 8317);
+        assert_eq!(star_one("13 players; last marble is worth 7999 points"), 146373);
+        assert_eq!(star_one("17 players; last marble is worth 1104 points"), 2764);
+        assert_eq!(star_one("21 players; last marble is worth 6111 points"), 54718);
+        assert_eq!(star_one("30 players; last marble is worth 5807 points"), 37305);
     }
 
     #[test]
