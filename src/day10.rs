@@ -1,7 +1,12 @@
+
 // Impossible to evaluate test, need to use human observation.
 #[allow(dead_code)]
 #[allow(unused_variables)]
 pub fn star_one(input: &str) -> i64 {
+    // Initializate points here
+    // Display positions
+    // Update tick
+
     1
 }
 
@@ -9,6 +14,22 @@ pub fn star_one(input: &str) -> i64 {
 #[allow(unused_variables)]
 pub fn star_two(input: &str) -> i64 {
     0
+}
+
+struct Point {
+    position: (i32, i32),
+    velocity: (i32, i32),
+}
+
+impl Point {
+    fn new(position: (i32, i32), velocity: (i32, i32)) -> Point {
+        Point { position, velocity }
+    }
+
+    fn update(&mut self) {
+        self.position.0 += self.velocity.0;
+        self.position.1 += self.velocity.1;
+    }
 }
 
 #[cfg(test)]
