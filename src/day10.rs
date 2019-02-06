@@ -1,13 +1,53 @@
+use std::cmp::{max, min};
+use std::collections::HashSet;
 
-// Impossible to evaluate test, need to use human observation.
 #[allow(dead_code)]
 #[allow(unused_variables)]
-pub fn star_one(input: &str) -> i64 {
-    // Initializate points here
-    // Display positions
-    // Update tick
+pub fn star_one(input: &str) -> String {
 
-    1
+    let mut points = build_points(&input);
+    // Find x and y bounds
+
+    let mut output = String::new();
+
+    loop {
+        let (x_min, _, x_max, _) = find_bounds(&points);
+        let last_width = x_max - x_min;
+
+        let positions = points
+            .iter()
+            .map(|x| x.position)
+            .collect::<HashSet<(i32, i32)>>();
+
+        for point in points.iter_mut() {
+            // Update tick
+            point.update();
+        }
+
+        let (x_min, _, x_max, _) = find_bounds(&points);
+
+        if x_max - x_min > last_width {
+
+            for point in points.iter_mut() {
+                point.rev();
+            }
+
+            // Display positions
+            let (x_min, y_min, x_max, y_max) = find_bounds(&points);
+            for y in y_min..=y_max {
+                for x in x_min..=x_max {
+                    if positions.contains(&(x, y)) {
+                        output.push('#');
+                    } else {
+                        output.push('.');
+                    }
+                }
+                output.push_str("\n");
+            }
+            break;
+        }
+    }
+    output
 }
 
 #[allow(dead_code)]
@@ -17,36 +57,28 @@ pub fn star_two(input: &str) -> i64 {
 }
 
 fn find_bounds(points: &Vec<Point>) -> (i32, i32, i32, i32) {
-    let mut x_min = None;
-    let mut y_min = None;
-    let mut x_max = None;
-    let mut y_max = None;
+    let mut x_min = std::i32::MAX;
+    let mut y_min = std::i32::MAX;
+    let mut x_max = std::i32::MIN;
+    let mut y_max = std::i32::MIN;
 
     for point in points {
         let pos = point.position;
-        if x_min == None || x_min > Some(pos.0){
-            x_min = Some(pos.0);
-        }
-        if y_min == None || y_min > Some(pos.1) {
-            y_min = Some(pos.1);
-        }
-        if x_max == None || x_max < Some(pos.0){
-            x_max = Some(pos.0);
-        }
-        if y_max == None || y_max < Some(pos.1) {
-            y_max = Some(pos.1);
-        }
+        x_min = min(x_min, pos.0);
+        x_max = max(x_max, pos.0);
+        y_min = min(y_min, pos.1);
+        y_max = max(y_max, pos.1);
     }
 
-    (x_min.unwrap(), y_min.unwrap(), x_max.unwrap(), y_max.unwrap())
+    (x_min, y_min, x_max, y_max)
 }
 
 fn build_points(input: &str) -> Vec<Point> {
     let mut points: Vec<Point> = Vec::new();
 
     for line in input.lines() {
-
-        let new = line.replace("position=<", " ")
+        let new = line
+            .replace("position=<", " ")
             .replace(",", " ")
             .replace("> velocity=<", " ")
             .replace(">", "")
@@ -63,7 +95,7 @@ fn build_points(input: &str) -> Vec<Point> {
     points
 }
 
-#[derive(Debug)]
+#[derive(Hash, Eq, PartialEq, Debug)]
 struct Point {
     position: (i32, i32),
     velocity: (i32, i32),
@@ -77,6 +109,11 @@ impl Point {
     fn update(&mut self) {
         self.position.0 += self.velocity.0;
         self.position.1 += self.velocity.1;
+    }
+
+    fn rev(&mut self) {
+        self.position.0 -= self.velocity.0;
+        self.position.1 -= self.velocity.1;
     }
 }
 
@@ -116,7 +153,14 @@ position=< 5,  0> velocity=< 1,  0>
 position=<-6,  0> velocity=< 2,  0>
 position=< 5,  9> velocity=< 1, -2>
 position=<14,  7> velocity=<-2,  0>
-position=<-3,  6> velocity=< 2, -1>"), 1)
+position=<-3,  6> velocity=< 2, -1>"), String::from("#...#..###
+#...#...#.
+#...#...#.
+#####...#.
+#...#...#.
+#...#...#.
+#...#...#.
+#...#..###\n"))
     }
 
     #[test]
