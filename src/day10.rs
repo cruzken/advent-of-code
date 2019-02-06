@@ -16,13 +16,61 @@ pub fn star_two(input: &str) -> i64 {
     0
 }
 
+fn find_bounds(points: &Vec<Point>) -> (i32, i32, i32, i32) {
+    let mut x_min = None;
+    let mut y_min = None;
+    let mut x_max = None;
+    let mut y_max = None;
+
+    for point in points {
+        let pos = point.position;
+        if x_min == None || x_min > Some(pos.0){
+            x_min = Some(pos.0);
+        }
+        if y_min == None || y_min > Some(pos.1) {
+            y_min = Some(pos.1);
+        }
+        if x_max == None || x_max < Some(pos.0){
+            x_max = Some(pos.0);
+        }
+        if y_max == None || y_max < Some(pos.1) {
+            y_max = Some(pos.1);
+        }
+    }
+
+    (x_min.unwrap(), y_min.unwrap(), x_max.unwrap(), y_max.unwrap())
+}
+
+fn build_points(input: &str) -> Vec<Point> {
+    let mut points: Vec<Point> = Vec::new();
+
+    for line in input.lines() {
+
+        let new = line.replace("position=<", " ")
+            .replace(",", " ")
+            .replace("> velocity=<", " ")
+            .replace(">", "")
+            .split_whitespace()
+            .map(|x| x.parse::<i32>().unwrap())
+            .collect::<Vec<_>>();
+
+        points.push(Point {
+            position: (new[0], new[1]),
+            velocity: (new[2], new[3]),
+        });
+    }
+
+    points
+}
+
+#[derive(Debug)]
 struct Point {
     position: (i32, i32),
     velocity: (i32, i32),
 }
 
 impl Point {
-    fn new(position: (i32, i32), velocity: (i32, i32)) -> Point {
+    fn _new(position: (i32, i32), velocity: (i32, i32)) -> Point {
         Point { position, velocity }
     }
 
