@@ -139,10 +139,10 @@ mod tests {
     fn solve_day11() {
         use day11::{star_one, star_two};
 
-        let input = load_file("day11.txt");
+        let input = 5791;
 
-        assert_eq!(star_one(&input), 1);
-        assert_eq!(star_two(&input), 1);
+        assert_eq!(star_one(input), (Some((2, 3)), 1));
+        assert_eq!(star_two(input), 1);
     }
     #[test]
     fn solve_day12() {
