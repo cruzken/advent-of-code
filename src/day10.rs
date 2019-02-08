@@ -4,11 +4,19 @@ use std::collections::HashSet;
 #[allow(dead_code)]
 #[allow(unused_variables)]
 pub fn star_one(input: &str) -> String {
+    get_message_in_time(input).0
+}
 
+#[allow(dead_code)]
+#[allow(unused_variables)]
+pub fn star_two(input: &str) -> u32 {
+    get_message_in_time(input).1
+}
+
+fn get_message_in_time(input: &str) -> (String, u32) {
     let mut points = build_points(&input);
-    // Find x and y bounds
-
     let mut output = String::new();
+    let mut tick = 0;
 
     loop {
         let (x_min, _, x_max, _) = find_bounds(&points);
@@ -20,14 +28,12 @@ pub fn star_one(input: &str) -> String {
             .collect::<HashSet<(i32, i32)>>();
 
         for point in points.iter_mut() {
-            // Update tick
             point.update();
         }
 
         let (x_min, _, x_max, _) = find_bounds(&points);
 
         if x_max - x_min > last_width {
-
             for point in points.iter_mut() {
                 point.rev();
             }
@@ -46,14 +52,9 @@ pub fn star_one(input: &str) -> String {
             }
             break;
         }
+        tick += 1;
     }
-    output
-}
-
-#[allow(dead_code)]
-#[allow(unused_variables)]
-pub fn star_two(input: &str) -> i64 {
-    0
+    (output, tick)
 }
 
 fn find_bounds(points: &Vec<Point>) -> (i32, i32, i32, i32) {
@@ -102,10 +103,6 @@ struct Point {
 }
 
 impl Point {
-    fn _new(position: (i32, i32), velocity: (i32, i32)) -> Point {
-        Point { position, velocity }
-    }
-
     fn update(&mut self) {
         self.position.0 += self.velocity.0;
         self.position.1 += self.velocity.1;
@@ -123,7 +120,7 @@ mod tests {
 
     #[test]
     fn test_star_one() {
-        assert_eq!(star_one("position=< 9,  1> velocity=< 0,  2>
+        let input = "position=< 9,  1> velocity=< 0,  2>
 position=< 7,  0> velocity=<-1,  0>
 position=< 3, -2> velocity=<-1,  1>
 position=< 6, 10> velocity=<-2, -1>
@@ -153,18 +150,57 @@ position=< 5,  0> velocity=< 1,  0>
 position=<-6,  0> velocity=< 2,  0>
 position=< 5,  9> velocity=< 1, -2>
 position=<14,  7> velocity=<-2,  0>
-position=<-3,  6> velocity=< 2, -1>"), String::from("#...#..###
+position=<-3,  6> velocity=< 2, -1>";
+
+        assert_eq!(
+            star_one(input),
+            String::from(
+                "#...#..###
 #...#...#.
 #...#...#.
 #####...#.
 #...#...#.
 #...#...#.
 #...#...#.
-#...#..###\n"))
+#...#..###\n"
+            )
+        )
     }
 
     #[test]
     fn test_star_two() {
-        assert_eq!(star_two(""), 1)
+        let input = "position=< 9,  1> velocity=< 0,  2>
+position=< 7,  0> velocity=<-1,  0>
+position=< 3, -2> velocity=<-1,  1>
+position=< 6, 10> velocity=<-2, -1>
+position=< 2, -4> velocity=< 2,  2>
+position=<-6, 10> velocity=< 2, -2>
+position=< 1,  8> velocity=< 1, -1>
+position=< 1,  7> velocity=< 1,  0>
+position=<-3, 11> velocity=< 1, -2>
+position=< 7,  6> velocity=<-1, -1>
+position=<-2,  3> velocity=< 1,  0>
+position=<-4,  3> velocity=< 2,  0>
+position=<10, -3> velocity=<-1,  1>
+position=< 5, 11> velocity=< 1, -2>
+position=< 4,  7> velocity=< 0, -1>
+position=< 8, -2> velocity=< 0,  1>
+position=<15,  0> velocity=<-2,  0>
+position=< 1,  6> velocity=< 1,  0>
+position=< 8,  9> velocity=< 0, -1>
+position=< 3,  3> velocity=<-1,  1>
+position=< 0,  5> velocity=< 0, -1>
+position=<-2,  2> velocity=< 2,  0>
+position=< 5, -2> velocity=< 1,  2>
+position=< 1,  4> velocity=< 2,  1>
+position=<-2,  7> velocity=< 2, -2>
+position=< 3,  6> velocity=<-1, -1>
+position=< 5,  0> velocity=< 1,  0>
+position=<-6,  0> velocity=< 2,  0>
+position=< 5,  9> velocity=< 1, -2>
+position=<14,  7> velocity=<-2,  0>
+position=<-3,  6> velocity=< 2, -1>";
+
+        assert_eq!(star_two(input), 3)
     }
 }
