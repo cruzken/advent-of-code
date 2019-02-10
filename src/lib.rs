@@ -141,7 +141,7 @@ mod tests {
 
         let input = 5791;
 
-        assert_eq!(star_one(input), (Some((2, 3)), 1));
+        assert_eq!(star_one(input), (Some((20, 68)), 29));
         assert_eq!(star_two(input), 1);
     }
     #[test]
