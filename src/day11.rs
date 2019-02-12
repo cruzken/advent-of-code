@@ -1,5 +1,5 @@
 #[allow(dead_code)]
-pub fn star_one(input: u32 ) -> (Option<(u32, u32)>, i32) {
+pub fn star_one(input: usize ) -> (Option<(u32, u32)>, i32) {
     let mut largest = std::i32::MIN;
     let mut largest_coord = None;
     let mut grid: Vec<Vec<i32>> = vec![vec![0; 300]; 300];
@@ -24,22 +24,22 @@ pub fn star_one(input: u32 ) -> (Option<(u32, u32)>, i32) {
 
 // Needs optimization, couldnt get it to finish on my machine
 #[allow(dead_code)]
-pub fn star_two(input: u32) -> (Option<(u32, u32, u32)>, i32) {
+pub fn star_two(input: usize) -> (Option<(u32, u32, u32)>, i32) {
+    const LENGTH: usize = 300;
     let mut largest = std::i32::MIN;
     let mut largest_coord = None;
-    let mut grid: Vec<Vec<i32>> = vec![vec![0; 300]; 300];
-
-    for y in 0..300 {
-        for x in 0..300 {
+    let mut grid: Vec<Vec<i32>> = vec![vec![0; LENGTH]; LENGTH];
+    for y in 0..LENGTH {
+        for x in 0..LENGTH {
             grid[x as usize][y as usize] = power_level((x, y), input);
         }
     }
 
-    let summed_table = build_summed_table(&grid);
+    let summed_table = build_summed_area(&grid);
    (largest_coord, largest) 
 }
 
-fn build_summed_table(grid: &Vec<Vec<i32>>) -> Vec<Vec<i32>> {
+fn build_summed_area(grid: &Vec<Vec<i32>>) -> Vec<Vec<i32>> {
 
     let mut summed_table = grid.clone();
 
@@ -68,7 +68,7 @@ fn power_square(coord: (u32, u32, u32), grid: &Vec<Vec<i32>>) -> i32 {
     sum
 }
 
-fn power_level(coord: (u32, u32), serial_num: u32) -> i32 {
+fn power_level(coord: (usize, usize), serial_num: usize) -> i32 {
     let rack_id = coord.0 + 10;
 
     let calc = ((rack_id * coord.1) + serial_num) * rack_id;
