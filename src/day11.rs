@@ -35,24 +35,27 @@ pub fn star_two(input: u32) -> (Option<(u32, u32, u32)>, i32) {
         }
     }
 
-    for z in 1..=300 {
-        for y in 1..=300 {
-            if y + z > 300 {
-                break;
+    let summed_table = build_summed_table(&grid);
+   (largest_coord, largest) 
+}
+
+fn build_summed_table(grid: &Vec<Vec<i32>>) -> Vec<Vec<i32>> {
+
+    let mut summed_table = grid.clone();
+
+    for row in 0..summed_table.len() {
+        for col in 0..summed_table[0].len() {
+            if col != 0 {
+                summed_table[row][col] += summed_table[row][col - 1];
             }
-            for x in 1..=300 {
-                if x + z > 300 {
-                    break;
-                }
-                let next = power_square((x + 1,y + 1,z), &grid);
-                if next > largest {
-                    largest = next;
-                    largest_coord = Some((x, y, z));
+            if row != 0 {
+                for i in 0..row {
+                    summed_table[row][col] += grid[i][col];
                 }
             }
         }
     }
-   (largest_coord, largest) 
+    summed_table
 }
 
 fn power_square(coord: (u32, u32, u32), grid: &Vec<Vec<i32>>) -> i32 {
