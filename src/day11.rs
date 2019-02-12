@@ -1,17 +1,23 @@
+// Solved using summed-area table approach
+
 #[allow(dead_code)]
-pub fn star_one(input: usize ) -> (Option<(u32, u32)>, i32) {
+pub fn star_one(serial_num: usize ) -> (Option<(usize, usize)>, i32) {
+    const LENGTH: usize = 300;
     let mut largest = std::i32::MIN;
     let mut largest_coord = None;
-    let mut grid: Vec<Vec<i32>> = vec![vec![0; 300]; 300];
+    let mut grid: Vec<Vec<i32>> = vec![vec![0; LENGTH]; LENGTH];
 
-    for y in 0..300 {
-        for x in 0..300 {
-            grid[x as usize][y as usize] = power_level((x, y), input);
+    for y in 0..LENGTH{
+        for x in 0..LENGTH {
+            grid[y as usize][x as usize] = power_level((x, y), serial_num);
         }
     }
-    for y in 1..=297 {
-        for x in 1..=297 {
-            let next = power_square((x + 1,y + 1,3), &grid);
+
+    let summed_table = build_summed_area(&grid);
+
+    for y in 0..=297 {
+        for x in 0..=297 {
+            let next = power_square(&summed_table, (x, y), 3);
             if next > largest {
                 largest = next;
                 largest_coord = Some((x, y));
@@ -22,21 +28,57 @@ pub fn star_one(input: usize ) -> (Option<(u32, u32)>, i32) {
    (largest_coord, largest) 
 }
 
-// Needs optimization, couldnt get it to finish on my machine
 #[allow(dead_code)]
-pub fn star_two(input: usize) -> (Option<(u32, u32, u32)>, i32) {
+pub fn star_two(serial_num: usize) -> (Option<(usize, usize, usize)>, i32) {
     const LENGTH: usize = 300;
     let mut largest = std::i32::MIN;
     let mut largest_coord = None;
     let mut grid: Vec<Vec<i32>> = vec![vec![0; LENGTH]; LENGTH];
-    for y in 0..LENGTH {
+
+    for y in 0..LENGTH{
         for x in 0..LENGTH {
-            grid[x as usize][y as usize] = power_level((x, y), input);
+            grid[y as usize][x as usize] = power_level((x, y), serial_num);
         }
     }
 
     let summed_table = build_summed_area(&grid);
+
+    for s in 1..=LENGTH {
+        for y in 0..=(LENGTH - s) {
+            for x in 0..=(LENGTH - s) {
+                let next = power_square(&summed_table, (x, y), s);
+                if next > largest {
+                    largest = next;
+                    largest_coord = Some((x, y, s));
+                }
+            }
+        }
+    }
+
    (largest_coord, largest) 
+}
+
+fn power_square(grid: &Vec<Vec<i32>>, (x, y): (usize, usize), length: usize) -> i32 {
+    let br = grid[y + length - 1][x + length - 1];
+    let mut tl = 0;
+    let mut t = 0;
+    let mut l = 0;
+
+    // check if left exists
+    if x > 0 {
+        l = grid[y + length - 1][x - 1];
+    }
+
+    // check if top exists
+    if y > 0 {
+        t = grid[y - 1][x + length - 1];
+    }
+    // check if top-left exists
+    if y > 0 && x > 0 {
+        tl = grid[y - 1][x - 1];
+    }
+
+    tl + br - t - l
 }
 
 fn build_summed_area(grid: &Vec<Vec<i32>>) -> Vec<Vec<i32>> {
@@ -58,19 +100,8 @@ fn build_summed_area(grid: &Vec<Vec<i32>>) -> Vec<Vec<i32>> {
     summed_table
 }
 
-fn power_square(coord: (u32, u32, u32), grid: &Vec<Vec<i32>>) -> i32 {
-    let mut sum = 0;
-    for x in coord.0..(coord.0 + coord.2) {
-        for y in coord.1..(coord.1 + coord.2) { 
-            sum += grid[x as usize - 1][y as usize - 1];
-        }
-    }
-    sum
-}
-
 fn power_level(coord: (usize, usize), serial_num: usize) -> i32 {
     let rack_id = coord.0 + 10;
-
     let calc = ((rack_id * coord.1) + serial_num) * rack_id;
 
     if calc < 100 {
@@ -96,5 +127,6 @@ mod tests {
     #[test]
     fn test_star_two() {
         assert_eq!(star_two(18), (Some((90,269,16)), 113));
+        assert_eq!(star_two(42), (Some((232,251,12)), 119));
     }
 }

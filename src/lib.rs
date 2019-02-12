@@ -142,7 +142,7 @@ mod tests {
         let input = 5791;
 
         assert_eq!(star_one(input), (Some((20, 68)), 29));
-        assert_eq!(star_two(input), 1);
+        assert_eq!(star_two(input), (Some((231, 273, 16)), 111))
     }
     #[test]
     fn solve_day12() {
