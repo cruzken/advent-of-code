@@ -9,7 +9,7 @@ pub fn star_one(serial_num: usize ) -> (Option<(usize, usize)>, i32) {
 
     for y in 0..LENGTH{
         for x in 0..LENGTH {
-            grid[y as usize][x as usize] = power_level((x, y), serial_num);
+            grid[y][x] = power_level((x, y), serial_num);
         }
     }
 
@@ -37,7 +37,7 @@ pub fn star_two(serial_num: usize) -> (Option<(usize, usize, usize)>, i32) {
 
     for y in 0..LENGTH{
         for x in 0..LENGTH {
-            grid[y as usize][x as usize] = power_level((x, y), serial_num);
+            grid[y][x] = power_level((x, y), serial_num);
         }
     }
 
