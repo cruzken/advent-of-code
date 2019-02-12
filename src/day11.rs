@@ -1,15 +1,15 @@
 // Solved using summed-area table approach
 
 #[allow(dead_code)]
-pub fn star_one(serial_num: usize ) -> (Option<(usize, usize)>, i32) {
+pub fn star_one(serial_num: usize) -> (Option<(usize, usize)>, i32) {
     const LENGTH: usize = 300;
     let mut largest = std::i32::MIN;
     let mut largest_coord = None;
     let mut grid: Vec<Vec<i32>> = vec![vec![0; LENGTH]; LENGTH];
 
-    for y in 0..LENGTH{
-        for x in 0..LENGTH {
-            grid[y][x] = power_level((x, y), serial_num);
+    for (y, row) in grid.iter_mut().enumerate() {
+        for (x, el) in row.iter_mut().enumerate() {
+            *el = power_level((x, y), serial_num);
         }
     }
 
@@ -25,7 +25,7 @@ pub fn star_one(serial_num: usize ) -> (Option<(usize, usize)>, i32) {
         }
     }
 
-   (largest_coord, largest) 
+    (largest_coord, largest)
 }
 
 #[allow(dead_code)]
@@ -35,9 +35,9 @@ pub fn star_two(serial_num: usize) -> (Option<(usize, usize, usize)>, i32) {
     let mut largest_coord = None;
     let mut grid: Vec<Vec<i32>> = vec![vec![0; LENGTH]; LENGTH];
 
-    for y in 0..LENGTH{
-        for x in 0..LENGTH {
-            grid[y][x] = power_level((x, y), serial_num);
+    for (y, row) in grid.iter_mut().enumerate() {
+        for (x, el) in row.iter_mut().enumerate() {
+            *el = power_level((x, y), serial_num);
         }
     }
 
@@ -55,35 +55,38 @@ pub fn star_two(serial_num: usize) -> (Option<(usize, usize, usize)>, i32) {
         }
     }
 
-   (largest_coord, largest) 
+    (largest_coord, largest)
 }
 
-fn power_square(grid: &Vec<Vec<i32>>, (x, y): (usize, usize), length: usize) -> i32 {
+fn power_square(grid: &[Vec<i32>], (x, y): (usize, usize), length: usize) -> i32 {
     let br = grid[y + length - 1][x + length - 1];
-    let mut tl = 0;
-    let mut t = 0;
-    let mut l = 0;
 
     // check if left exists
-    if x > 0 {
-        l = grid[y + length - 1][x - 1];
-    }
+    let l = if x > 0 {
+        grid[y + length - 1][x - 1]
+    } else {
+        0
+    };
 
     // check if top exists
-    if y > 0 {
-        t = grid[y - 1][x + length - 1];
-    }
+    let t = if y > 0 {
+        grid[y - 1][x + length - 1]
+    } else {
+        0
+    };
+
     // check if top-left exists
-    if y > 0 && x > 0 {
-        tl = grid[y - 1][x - 1];
-    }
+    let tl = if y > 0 && x > 0 {
+        grid[y - 1][x - 1]
+    } else {
+        0
+    };
 
     tl + br - t - l
 }
 
-fn build_summed_area(grid: &Vec<Vec<i32>>) -> Vec<Vec<i32>> {
-
-    let mut summed_table = grid.clone();
+fn build_summed_area(grid: &[Vec<i32>]) -> Vec<Vec<i32>> {
+    let mut summed_table = grid.to_owned();
 
     for row in 0..summed_table.len() {
         for col in 0..summed_table[0].len() {
@@ -126,7 +129,7 @@ mod tests {
 
     #[test]
     fn test_star_two() {
-        assert_eq!(star_two(18), (Some((90,269,16)), 113));
-        assert_eq!(star_two(42), (Some((232,251,12)), 119));
+        assert_eq!(star_two(18), (Some((90, 269, 16)), 113));
+        assert_eq!(star_two(42), (Some((232, 251, 12)), 119));
     }
 }
