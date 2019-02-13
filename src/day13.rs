@@ -16,7 +16,12 @@ mod tests {
 
     #[test]
     fn test_star_one() {
-        assert_eq!(star_one(""), 1)
+        assert_eq!(star_one("/->-\\        
+|   |  /----\
+| /-+--+-\\  |
+| | |  | v  |
+\\-+-/  \\-+--/
+  \\------/  "), 1)
     }
 
     #[test]
