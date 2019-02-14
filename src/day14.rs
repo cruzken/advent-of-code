@@ -16,7 +16,9 @@ mod tests {
 
     #[test]
     fn test_star_one() {
-        assert_eq!(star_one(""), 1)
+        assert_eq!(star_one("5"), 0124515891);
+        assert_eq!(star_one("18"), 9251071085);
+        assert_eq!(star_one("2018"), 5941429882);
     }
 
     #[test]
