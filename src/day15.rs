@@ -16,7 +16,7 @@ mod tests {
 
     #[test]
     fn test_star_one() {
-        assert_eq!(star_one(""), 1)
+        assert_eq!(star_one("#######\n#G..#E#\n#E#E.E#\n#G.##.#\n#...#E#\n#...E.#\n#######"), 36334)
     }
 
     #[test]
@@ -24,3 +24,6 @@ mod tests {
         assert_eq!(star_two(""), 1)
     }
 }
+
+
+
