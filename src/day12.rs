@@ -11,8 +11,9 @@ pub fn star_one(input: &str) -> usize {
     let mut next_gen: String;
 
     println!("{} pots: {}", old_gen, sum);
+    let mut origin_index = 0;
     for i in 0..20 {
-        next_gen = proceed_generation(&old_gen, &patterns);
+        next_gen = proceed_generation(&old_gen, &patterns, &mut origin_index);
         old_gen = next_gen.clone();
         sum += old_gen.chars().filter(|x| *x == '#').count();
         println!("{}: {} pots: {}", i + 1, next_gen, sum);
@@ -24,6 +25,22 @@ pub fn star_one(input: &str) -> usize {
 #[allow(unused_variables)]
 pub fn star_two(input: &str) -> i64 {
     0
+}
+
+struct _Pot {
+    index: i32,
+    pot: char,
+}
+
+fn padded_index_check(input: &Vec<char>) -> i32 {
+    let mut prefix = 4;
+    for item in input.into_iter() {
+        if *item == '#' || prefix == 0 {
+            break;
+        }
+        prefix -= 1;
+    }
+    prefix
 }
 
 fn padded(input: &Vec<char>) -> Vec<char> {
@@ -53,9 +70,10 @@ fn padded(input: &Vec<char>) -> Vec<char> {
     output
 }
 
-fn proceed_generation(input: &str, patterns: &HashMap<String, char>) -> String {
+fn proceed_generation(input: &str, patterns: &HashMap<String, char>, origin_index: &mut i32) -> String {
+    *origin_index += padded_index_check(&input.chars().collect::<Vec<char>>());
     let padded_gen = padded(&input.chars().collect::<Vec<char>>());
-
+    println!("origin_index is {}", origin_index);
     let mut next_gen = String::new();
     for i in 0..padded_gen.len() {
         let mut base = String::new();
