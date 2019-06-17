@@ -2,11 +2,10 @@ use std::collections::HashMap;
 
 #[allow(dead_code)]
 #[allow(unused_variables)]
-pub fn star_one(input: &str) -> i32 {
+pub fn star_one(input: &str) -> i64 {
     let mut old_gen = initial_state(input);
     let mut sum = 0;
-    let patterns: HashMap<String, char> =
-        input.lines().skip(2).map(|x| parse_pattern(x)).collect();
+    let patterns: HashMap<String, char> = input.lines().skip(2).map(|x| parse_pattern(x)).collect();
 
     let mut next_gen: String;
 
@@ -18,7 +17,7 @@ pub fn star_one(input: &str) -> i32 {
         sum = 0;
         for (i, item) in old_gen.chars().enumerate() {
             if item == '#' {
-                sum += i as i32 - origin_index;
+                sum += i as i64 - origin_index;
             }
         }
         println!("{}: {} pots: {}", i + 1, next_gen, sum);
@@ -29,10 +28,29 @@ pub fn star_one(input: &str) -> i32 {
 #[allow(dead_code)]
 #[allow(unused_variables)]
 pub fn star_two(input: &str) -> i64 {
-    0
+    let mut old_gen = initial_state(input);
+    let mut sum = 0;
+    let patterns: HashMap<String, char> = input.lines().skip(2).map(|x| parse_pattern(x)).collect();
+
+    let mut next_gen: String;
+
+    println!("{} pots: {}", old_gen, sum);
+    let mut origin_index = 0;
+    for i in 0_i64..50000000000 {
+        next_gen = proceed_generation(&old_gen, &patterns, &mut origin_index);
+        old_gen = next_gen.clone();
+        sum = 0;
+        for (i, item) in old_gen.chars().enumerate() {
+            if item == '#' {
+                sum += i as i64 - origin_index;
+            }
+        }
+        println!("{}: {} pots: {}", i + 1, next_gen, sum);
+    }
+    sum
 }
 
-fn padded_index_check(input: &Vec<char>) -> i32 {
+fn padded_index_check(input: &Vec<char>) -> i64 {
     let mut prefix = 4;
     for item in input.into_iter() {
         if *item == '#' || prefix == 0 {
@@ -70,7 +88,11 @@ fn padded(input: &Vec<char>) -> Vec<char> {
     output
 }
 
-fn proceed_generation(input: &str, patterns: &HashMap<String, char>, origin_index: &mut i32) -> String {
+fn proceed_generation(
+    input: &str,
+    patterns: &HashMap<String, char>,
+    origin_index: &mut i64,
+) -> String {
     *origin_index += padded_index_check(&input.chars().collect::<Vec<char>>());
     let padded_gen = padded(&input.chars().collect::<Vec<char>>());
     println!("origin_index is {}", origin_index);
@@ -136,7 +158,7 @@ fn parse_pattern(input: &str) -> (String, char) {
     (parsed[0].clone(), parsed[1].clone().chars().nth(0).unwrap())
 }
 
-fn initial_state(input: &str) -> String  {
+fn initial_state(input: &str) -> String {
     input
         .lines()
         .nth(0)
@@ -177,6 +199,26 @@ mod tests {
 
     #[test]
     fn test_star_two() {
-        assert_eq!(star_two(""), 1)
+        assert_eq!(
+            star_two(
+                "initial state: #..#.#..##......###...###
+
+...## => #
+..#.. => #
+.#... => #
+.#.#. => #
+.#.## => #
+.##.. => #
+.#### => #
+#.#.# => #
+#.### => #
+##.#. => #
+##.## => #
+###.. => #
+###.# => #
+####. => #"
+            ),
+            1
+        )
     }
 }
