@@ -2,9 +2,9 @@ use std::collections::HashMap;
 
 #[allow(dead_code)]
 #[allow(unused_variables)]
-pub fn star_one(input: &str) -> usize {
+pub fn star_one(input: &str) -> i32 {
     let mut old_gen = initial_state(input);
-    let mut sum = old_gen.chars().filter(|x| *x == '#').count();
+    let mut sum = 0;
     let patterns: HashMap<String, char> =
         input.lines().skip(2).map(|x| parse_pattern(x)).collect();
 
@@ -15,7 +15,12 @@ pub fn star_one(input: &str) -> usize {
     for i in 0..20 {
         next_gen = proceed_generation(&old_gen, &patterns, &mut origin_index);
         old_gen = next_gen.clone();
-        sum += old_gen.chars().filter(|x| *x == '#').count();
+        sum = 0;
+        for (i, item) in old_gen.chars().enumerate() {
+            if item == '#' {
+                sum += i as i32 - origin_index;
+            }
+        }
         println!("{}: {} pots: {}", i + 1, next_gen, sum);
     }
     sum
@@ -25,11 +30,6 @@ pub fn star_one(input: &str) -> usize {
 #[allow(unused_variables)]
 pub fn star_two(input: &str) -> i64 {
     0
-}
-
-struct _Pot {
-    index: i32,
-    pot: char,
 }
 
 fn padded_index_check(input: &Vec<char>) -> i32 {
