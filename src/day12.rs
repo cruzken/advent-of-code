@@ -1,7 +1,6 @@
 use std::collections::HashMap;
 
 #[allow(dead_code)]
-#[allow(unused_variables)]
 pub fn star_one(input: &str) -> i64 {
     let mut old_gen = initial_state(input);
     let mut sum = 0;
@@ -29,23 +28,36 @@ pub fn star_one(input: &str) -> i64 {
 #[allow(unused_variables)]
 pub fn star_two(input: &str) -> i64 {
     let mut old_gen = initial_state(input);
-    let mut sum = 0;
+    let mut sum: i64 = 0;
     let patterns: HashMap<String, char> = input.lines().skip(2).map(|x| parse_pattern(x)).collect();
 
     let mut next_gen: String;
 
     println!("{} pots: {}", old_gen, sum);
     let mut origin_index = 0;
-    for i in 0_i64..50000000000 {
-        next_gen = proceed_generation(&old_gen, &patterns, &mut origin_index);
-        old_gen = next_gen.clone();
-        sum = 0;
-        for (i, item) in old_gen.chars().enumerate() {
-            if item == '#' {
-                sum += i as i64 - origin_index;
+
+    let mut old_sum = 0;
+    let mut new_sum_diff: i64 = 0;
+    let mut old_sum_diff = -1;
+
+    for i in 0_i64..500000000 {
+        if new_sum_diff != old_sum_diff || new_sum_diff == 1 {
+            old_sum_diff = new_sum_diff;
+            next_gen = proceed_generation(&old_gen, &patterns, &mut origin_index);
+            old_gen = next_gen.clone();
+            sum = 0;
+            for (i, item) in old_gen.chars().enumerate() {
+                if item == '#' {
+                    sum += i as i64 - origin_index;
+                }
             }
+            new_sum_diff = sum - old_sum;
+            old_sum = sum;
+            println!("{}: pots: {} sum difference: {}", i + 1, sum, new_sum_diff);
+        } else {
+            sum += new_sum_diff * (50000000000 - i);
+            break;
         }
-        println!("{}: {} pots: {}", i + 1, next_gen, sum);
     }
     sum
 }
@@ -218,7 +230,7 @@ mod tests {
 ###.# => #
 ####. => #"
             ),
-            1
+            999999999374
         )
     }
 }
