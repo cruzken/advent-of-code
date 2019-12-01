@@ -5,7 +5,7 @@ pub fn star_one(input: &str) -> i32 {
     let mut sum = 0;
 
     for el in input.lines() {
-        sum = el.parse::<i32>().unwrap();
+        sum += el.parse::<i32>().unwrap();
     }
     sum
 }
