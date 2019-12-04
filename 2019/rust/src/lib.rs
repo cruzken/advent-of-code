@@ -52,7 +52,7 @@ mod tests {
         let input = load_file("day02.txt");
 
         assert_eq!(star_one(&input), 4714701);
-        assert_eq!(star_two(&input), 0);
+        assert_eq!(star_two(&input), 5121);
     }
     #[test]
     fn solve_day03() {
@@ -60,8 +60,8 @@ mod tests {
 
         let input = load_file("day03.txt");
 
-        assert_eq!(star_one(&input), 1);
-        assert_eq!(star_two(&input), 1);
+        assert_eq!(star_one(&input), 352);
+        assert_eq!(star_two(&input), 43848);
     }
     #[test]
     fn solve_day04() {
