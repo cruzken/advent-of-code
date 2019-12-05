@@ -8,12 +8,12 @@ trait PasswordCheck {
 
 impl PasswordCheck for u32 {
     fn not_decreasing(self) -> bool {
-        let mut digits: String = self.to_string();
+        let digits: String = self.to_string();
         let mut d = digits.chars();
         let mut last = d.next().unwrap();
 
         for i in d {
-            if (last.to_digit(10).unwrap() > i.to_digit(10).unwrap()) {
+            if last.to_digit(10).unwrap() > i.to_digit(10).unwrap() {
                 return false;
             }
             last = i;
@@ -22,12 +22,12 @@ impl PasswordCheck for u32 {
     }
 
     fn double_adjacent(self) -> bool {
-        let mut digits: String = self.to_string();
+        let digits: String = self.to_string();
         let mut d = digits.chars();
         let mut last = d.next().unwrap();
 
         for i in d {
-            if (last == i) {
+            if last == i {
                 return true;
             }
             last = i;
@@ -37,12 +37,12 @@ impl PasswordCheck for u32 {
 
     fn one_adjacent_pair(self) -> bool {
         let mut adjacent: HashMap<char, u32> = HashMap::new();
-        let mut digits: String = self.to_string();
+        let digits: String = self.to_string();
         let mut d = digits.chars();
         let mut last = d.next().unwrap();
 
         for i in d {
-            if (last == i) {
+            if last == i {
                 let count = adjacent.entry(i).or_insert(0);
                 *count += 1;
             }
