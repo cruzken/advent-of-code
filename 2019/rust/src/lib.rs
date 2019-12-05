@@ -69,8 +69,8 @@ mod tests {
 
         let input = load_file("day04.txt");
 
-        assert_eq!(star_one(&input), 1);
-        assert_eq!(star_two(&input), 1);
+        assert_eq!(star_one(&input), Some(1694));
+        assert_eq!(star_two(&input), Some(1148));
     }
     #[test]
     fn solve_day05() {
